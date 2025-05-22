@@ -1,0 +1,235 @@
+<!DOCTYPE>
+<html>
+<head>
+<meta charset="UTF-8">
+<title> Run Off Triangle 
+</title>
+<script 
+src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"> </script>
+
+<style > 
+body {
+   background-color: powderblue;
+font-family: verdana;
+}
+section{
+font-family: verdana;
+padding: 30px;
+background-color: pink;
+border-radius: 30px;
+}
+
+p{  
+color : white;
+}
+    .dropdown-content {
+      display: none;
+      position: absolute;
+      background-color: grey;
+      box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+      padding: 30px;
+      border-radius: 0px;
+    }
+
+    .dropdown-content button {
+      display: block;
+      margin: 5px 0;
+    }
+
+    .show {
+      display: block;
+    }
+  
+.file-upload-container {
+      display: flex;
+      align-items: center; 
+      justify-content: flex-start; 
+    }
+    input[type="file"], button {
+      padding: 10px;
+      margin-top: 10px;
+border-radius:  30px;
+background-color:powderblue;
+    }
+    table {
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    table, th, td {
+      border: 1px solid #999;
+      padding: 8px;
+    }
+    th {
+      background-color: #f4f4f4;
+    }
+
+    #output, #completedTriangle, #devFactorsOutput{
+      margin-top: 20px;
+    }
+
+
+.highlight {
+background-color: lightgreen;
+font-weight: bold
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="file-upload-container">
+    <label for="fileInput">Upload Your Data:</label>
+    <input type="file" id="fileInput" accept=".csv,.xlsx">
+  </div>
+  
+  <br>
+<p><i> Note: Please upload a .csv or xlsx file</i> </p>
+
+
+<button onclick="toggleDropdown()">Choose Option</button>
+
+<div id ="output"></div>
+
+
+<div id="completedTriangle"></div>
+<div id="devFactorsOutput"></div>
+
+  <div id="dropdown" class="dropdown-content">
+    <button onclick="doDevelopmentCalc()">Development factors</button>
+    <button onclick="doCompleteTriangle()">Complete the Run off Triangle</button>
+      </div>
+<script>
+
+let numericTriangle = [];
+  let devFactors = [];
+  let numRows = 0;
+  let numCols = 0;
+    function toggleDropdown() {
+      document.getElementById("dropdown").classList.toggle("show");
+    }
+function doDevelopmentCalc() {
+const file = document.getElementById('fileInput').files[0];
+
+
+if (!file){ alert('Please select a file first.');
+        return;
+  }
+const extension = file.name.split('.').pop().toLowerCase();
+
+if (extension === 'csv'){
+Papa.parse(file, {
+complete: function(results){
+processData(results.data);
+}
+  });
+} else if (extension === 'xlsx'){
+const reader= new FileReader();
+reader.onload = function(e){
+const data = new Uint8Array(e.target.result);
+const workbook = XLSX.read(data, { type: 'array' });
+          const sheet = workbook.Sheets[workbook.SheetNames[0]];
+          const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+          processData(jsonData);
+}
+reader.readAsArrayBuffer(file);
+  } else { 
+alert('only .csv or .xlsx files are supported.')
+    }
+
+}
+
+function processData(data){
+
+const cleanedData = data.filter(row => row.some(cell => cell !== "" && cell != null));
+
+
+
+const triangle = cleanedData.slice(1).map(row=> row.slice(1));
+
+ numRows = triangle.length;
+
+numCols = triangle[0]?.length || 0;
+
+
+
+ numericTriangle = triangle.map(row => row.map(cell => Number(cell)));
+
+
+ devFactors = [];
+
+for ( let col = 0; col< numCols -1 ; col++){
+let numerator = 0;
+let denominator = 0; 
+
+for (let row=0; row < numRows -col-1; row++){ 
+const current = numericTriangle[row][col];
+const next = numericTriangle[row][col+1];
+
+if (!isNaN(current)&& !isNaN(next)){
+numerator+= next;
+denominator+= current
+
+   }
+ }
+
+const factor = denominator !== 0? numerator/denominator :1
+devFactors.push(factor);
+}
+
+displayDevFactors(devFactors);
+displayCompletedTriangle(data, "Uncompleted Run-off Triangle");
+
+
+}
+
+function doCompleteTriangle() {
+
+for(let col=0 ; col< numCols-1 ; col++) {   
+ 
+for (let row=0 ; row < numRows ; row++){   
+const current = numericTriangle[row][col];
+const next =numericTriangle[row][col+1];
+
+
+if ( isNaN (next)&&!isNaN(current)){
+numericTriangle[row][col+1] = current*devFactors[col];
+        }
+     }
+ }
+  displayCompletedTriangle(numericTriangle,"Completed Run-off Triangle" );
+}
+
+function displayCompletedTriangle(triangle, titleText) {
+    const container = document.getElementById("completedTriangle");
+    let html = `<h3>${titleText}</h3><table>`;
+    triangle.forEach(row => {
+      html += "<tr>";
+      row.forEach(cell => {
+        html += `<td>${isNaN(cell) ? "" : cell.toFixed(0)}</td>`;
+      });
+
+      html += "</tr>";
+    });
+    html += "</table>";
+    container.innerHTML = html;
+  }
+
+  function displayDevFactors(factors) {
+    const container = document.getElementById("devFactorsOutput");
+    let html = "<h3> Development Factors </h3><table><tr>"
+factors.forEach(factor=> { 
+html+= `<td>${factor.toFixed(5)}</td>`
+  });
+
+html += "</tr></table>";
+container.innerHTML = html
+  }
+  </script>
+
+</body>  
+
+
+</html>

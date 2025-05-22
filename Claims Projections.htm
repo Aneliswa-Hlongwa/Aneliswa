@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+
+<html>
+<head> 
+<meta charset="UTF-8">
+<title> Claims Projection
+</title>
+<script 
+src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"> </script>
+ <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background-color:pink;
+    }
+section{
+font-family: verdana;
+padding: 30px;
+background-color: powderblue;
+border-radius: 30px;
+}
+.file-upload-container {
+      display: flex;
+      align-items: center; 
+      justify-content: flex-start; 
+    }
+    input[type="file"], button {
+      padding: 10px;
+      margin-top: 10px;
+border-radius:  30px;
+background-color:powderblue;
+    }
+    table {
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    table, th, td {
+      border: 1px solid #999;
+      padding: 8px;
+    }
+    th {
+      background-color: #f4f4f4;
+    }
+    #output {
+      margin-top: 20px;
+    }
+#summaryOutput {
+  margin-top: 30px;
+  background-color: powderblue;
+  padding: 15px;
+  border-radius: 10px;
+}
+.highlight {
+background-color: powderblue;
+font-weight: bold
+}
+
+  </style>
+
+</head>
+<section>
+<p>This model is created to calculate the claim projection for the next period (n+1), given the data for the previous years. Here the  <b> Empirical Bayes Credibility Theory Model 1.<br>  <br><i>Note: your data must be in  a .csv or .xlxs file </i></b></p>
+</section>
+
+<body>
+
+<div class="file-upload-container">
+    <label for="fileInput">Upload Your Data:</label>
+    <input type="file" id="fileInput" accept=".csv,.xlsx">
+  </div>
+  
+  <br>
+<p><i> Note: Please upload a .csv or xlsx file</i> </p>
+<button onclick = "readFile()"> Read File </button>
+
+<div id ="output"></div>
+<div id="summaryOutput"></div>
+ 
+  <script>
+     function readFile() {
+      const file = document.getElementById('fileInput').files[0];
+
+      if (!file) {
+        alert('Please select a file first.');
+        return;
+      } else{ alert('Calcualtions done');
+}
+
+      const extension = file.name.split('.').pop().toLowerCase();
+
+      if (extension === 'csv') {
+        Papa.parse(file, {
+          complete: function(results) {
+            displayData(results.data);
+          }
+        });
+      } else if (extension === 'xlsx') {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const data = new Uint8Array(e.target.result);
+          const workbook = XLSX.read(data, { type: 'array' });
+          const sheet = workbook.Sheets[workbook.SheetNames[0]];
+          const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+          displayData(jsonData);
+        };
+        reader.readAsArrayBuffer(file);
+      } else {
+        alert('Only .csv or .xlsx files are allowed.');
+      }
+    }
+
+  function displayData(data) {
+  const output = document.getElementById('output');
+  let html = '<h3>Uploaded Data</h3><table>';
+
+  data.forEach(row => {
+    html += '<tr>';
+    row.forEach(cell => {
+      html += `<td>${cell !== undefined ? cell : ''}</td>`;
+    });
+    html += '</tr>';
+  });
+  html += '</table>';
+
+  html += '<h3>Intermediary Calculations</h3>';
+  html += '<table><tr><th>' + data[0][0] + '</th><th>Mean</th><th>∑(x<sub>ij</sub> − x̄<sub>i</sub>)²</th><th>(x̄<sub>i</sub> − x̄)²</th><th>Claims Projetion</th></tr>';
+
+  let totalMean = 0;
+  let meanCount = 0;
+  let totalDeviation = 0;
+  let rowMeans = [];
+ 
+
+  for (let i = 1; i < data.length; i++) {
+    const row = data[i];
+    const label = row[0];
+    const numericValues = row
+      .slice(1)
+      .map(cell => parseFloat(cell))
+      .filter(val => !isNaN(val));
+
+    if (numericValues.length > 0) {
+      const mean = numericValues.reduce((sum, val) => sum + val, 0) / numericValues.length;
+      const squareDeviationSum = numericValues.reduce((sum, val) => sum + (val - mean) ** 2, 0);
+
+      totalMean += mean;
+      meanCount++;
+      totalDeviation += squareDeviationSum;
+
+      rowMeans.push({ label, mean, squareDeviationSum });
+
+    } else {
+      html += `<tr><td>${label}</td><td>N/A</td><td>N/A</td><td>N/A</td></tr>`;
+    }
+  }
+
+const meanOfMeans = totalMean / meanCount;
+  
+let totalMeanDeviation = 0;
+rowMeans.forEach(({ mean }) => {
+  totalMeanDeviation += (mean - meanOfMeans) ** 2;
+});
+ const numRows = data.slice(1).filter(row =>
+  row.slice(1).some(cell => !isNaN(parseFloat(cell)))
+).length;
+
+let numCols = 0;
+    const colCount = data[0].length;
+    for (let col = 1; col < colCount; col++) {
+      if (data.slice(1).some(row => !isNaN(parseFloat(row[col])))) {
+        numCols++;
+      }
+    }
+
+const meanOfVariances = totalDeviation/((numCols-1)*numRows);
+const varianceOfMeans = totalMeanDeviation/(numRows-1) - meanOfVariances/numCols;
+
+const Z = numCols / (numCols + (meanOfVariances / varianceOfMeans));
+
+ rowMeans.forEach(({ label, mean, squareDeviationSum }) => {
+    const meanDeviation = (mean - meanOfMeans) ** 2;
+    totalMeanDeviation += meanDeviation;
+const claimProjection = Z*mean +(1-Z)*meanOfMeans;
+
+html += `<tr><td>${label}</td><td>${mean.toFixed(2)}</td><td>${squareDeviationSum.toFixed(2)}</td><td>${meanDeviation.toFixed(2)}</td><td class="highlight">${claimProjection.toFixed(2)}</td></tr>`;
+  });
+
+  html += `<tr><td><strong>Total</strong></td><td><strong>${totalMean.toFixed(2)}</strong></td>
+<td><strong>${totalDeviation.toFixed(2)}</strong></td><td><strong>${totalMeanDeviation.toFixed(2)}</strong></td></tr>`;
+
+html += '</table>';
+
+document.getElementById('summaryOutput').innerHTML = `
+      <h3>Summary</h3>
+      <p><strong>Number of Rows:</strong> ${numRows}</p>
+      <p><strong>Number of Columns:</strong> ${numCols}</p>
+      <p><strong>Mean of Means(x̄):  </strong> ${meanOfMeans.toFixed(2)}</p>
+      <p><strong>Mean of VariancesE(S<sup>2</sup>): </strong> ${meanOfVariances.toFixed(2)}</p>
+      <p><strong>Variance of Means(V):  </strong> ${varianceOfMeans.toFixed(2)}</p>
+      <p><strong>Z (Credibility Factor):</strong> ${Z.toFixed(6)}</p>
+    `;
+  output.innerHTML = html;
+}
+
+
+</script>
+</body>
+
+ </html>
