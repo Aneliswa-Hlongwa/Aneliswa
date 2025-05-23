@@ -2,16 +2,100 @@
 <html>
   <head>
   <style>
-    header{
-      background-color: lightblue;
-      padding: 20px;
-    }
-    nav a {
-      padding: 20px;
-      background-color: pink;
-      border: 10px;
-    }
-  </style>
+        body {
+            font-family: "Comic San Ms";
+            background-color:navy;
+            margin: 0;
+            padding: 0px;
+            
+        }
+        header {
+            background-color: powderblue;
+            font-family: "Algerian";
+            display: flex;
+            justify-content:space-between;
+            color: navy;
+            padding: 20px;
+            align-items:center;
+            text-align: left;
+            font-size: 200%;
+            font-weight: bold;
+            width:500px
+           
+        }
+        section {
+            padding: 20px;
+            background-color: powderblue;
+            margin: 0px;
+            width: 500px;
+            height: 350px;
+            color:navy;
+            
+
+        }
+        h2 {
+            color: navy;
+            font-size: 500%;
+            font-family: "Eras ITC";
+            text-align: center
+        }
+        h3{
+            color :navy;
+            font-size: 100%;
+            font-family:"Eras ITIC";
+            text-align: center;
+        }
+      nav{
+           
+            margin-left:0px;
+            text-align: right;
+            font-family: "Eras ITC";
+            color:powderblue;
+          font-family: "verdana";
+          font-size: 200%;
+          border: 2px solid powderblue;
+           
+        }
+        a{
+            text-decoration:none;
+            color: powderblue;
+            
+        }
+        footer{
+            background-color: powderblue;
+            color:navy;
+        }
+        @keyframes slideInFromLeft {
+  0% {
+    opacity: 0;
+    transform: translateX(-50px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-float {
+  animation: slideInFromLeft 1s ease-out forwards;
+}
+
+         @keyframes slideInFromAbove {
+  0% {
+    opacity: 0;
+    transform: translateY(-50px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide {
+  animation: slideInFromAbove 1s ease-out forwards;
+}
+
+    </style>
     
   </head>
   <body>
