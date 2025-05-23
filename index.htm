@@ -42,12 +42,12 @@
             text-align: center
         }
         nav{
-            background-color:brown;
+           
             margin-left:0px;
             text-align: right;
             font-family: "Eras ITC";
             color:black;
-            width:500px
+           
         }
         a{
             text-decoration:none;
@@ -71,16 +71,31 @@
   animation: slideInFromLeft 1s ease-out forwards;
 }
 
+         @keyframes slideInFromAbove {
+  0% {
+    opacity: 0;
+    transform: translateY(-50px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide {
+  animation: slideInFromAbove 1s ease-out forwards;
+}
+
     </style>
 </head>
 <body>
 
-<header class="animate-float">
-    A.
+<header class="animate-slide">
+    ANELISWA HLONGWA.
 </header>
 
     
-      <nav class="animate-float">
+      <nav class="animate-slide">
           <ul>
          <a href= "index.htm">Home</a> 
       <a href = "Projects.html">Projects</a>
