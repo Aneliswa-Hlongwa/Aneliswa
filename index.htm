@@ -53,6 +53,24 @@
             text-decoration:none;
             text-align: right;
         }
+        footer{
+            background-color: brown;
+        }
+        @keyframes floatIn {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-float {
+  animation: floatIn 1s ease-out forwards;
+}
+
     </style>
 </head>
 <body>
@@ -62,7 +80,7 @@
 </header>
 
     
-      <nav>
+      <nav class="animate-float">
           <ul>
          <a href= "index.htm">Home</a> 
       <a href = "Projects.html">Projects</a>
@@ -70,7 +88,7 @@
         </ul>
       </nav>
 
-<section>
+<section class="animate-float">
     <h2>
     OH.HELLO THERE!
     </h2>  
