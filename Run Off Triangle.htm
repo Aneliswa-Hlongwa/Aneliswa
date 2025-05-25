@@ -2,9 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title> Run Off Triangle 
-    <link rel="icon" href= "Favicon.jpeg" type="image/jpeg">
 </title>
 <script 
 src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
@@ -73,7 +71,7 @@ background-color:powderblue;
 
 
 .highlight {
-background-color: lightgreen;
+background-color: pink;
 font-weight: bold
 }
 </style>
@@ -81,6 +79,10 @@ font-weight: bold
 </head>
 
 <body>
+<section>
+<h3 style = "color: black; font-width: bold;">This tool helps compute development factors based on the input data, allowing users to complete and project values in a run-off triangle. <br>
+  The user must ensure the input data is a csv or xlsx file.</h3>
+</section>
 
 <div class="file-upload-container">
     <label for="fileInput">Upload Your Data:</label>
@@ -104,11 +106,14 @@ font-weight: bold
     <button onclick="doCompleteTriangle()">Complete the Run off Triangle</button>
       </div>
 <script>
-
+let calculatedCells = [];
 let numericTriangle = [];
   let devFactors = [];
   let numRows = 0;
   let numCols = 0;
+let columnHeaders = [];
+let rowHeaders = [];
+
     function toggleDropdown() {
       document.getElementById("dropdown").classList.toggle("show");
     }
@@ -147,8 +152,8 @@ function processData(data){
 
 const cleanedData = data.filter(row => row.some(cell => cell !== "" && cell != null));
 
-
-
+columnHeaders = cleanedData[0].slice(1);
+rowHeaders = cleanedData.slice(1).map(row => row[0]);
 const triangle = cleanedData.slice(1).map(row=> row.slice(1));
 
  numRows = triangle.length;
@@ -182,12 +187,14 @@ devFactors.push(factor);
 }
 
 displayDevFactors(devFactors);
-displayCompletedTriangle(data, "Uncompleted Run-off Triangle");
+displayCompletedTriangle(triangle, "Uncompleted Run-off Triangle");
 
 
 }
 
 function doCompleteTriangle() {
+
+calculatedCells = Array.from({ length: numRows }, () => Array(numCols).fill(false));
 
 for(let col=0 ; col< numCols-1 ; col++) {   
  
@@ -198,27 +205,38 @@ const next =numericTriangle[row][col+1];
 
 if ( isNaN (next)&&!isNaN(current)){
 numericTriangle[row][col+1] = current*devFactors[col];
-        }
+    calculatedCells[row][col + 1] = true;
+      }
      }
  }
   displayCompletedTriangle(numericTriangle,"Completed Run-off Triangle" );
 }
 
 function displayCompletedTriangle(triangle, titleText) {
-    const container = document.getElementById("completedTriangle");
-    let html = `<h3>${titleText}</h3><table>`;
-    triangle.forEach(row => {
-      html += "<tr>";
-      row.forEach(cell => {
-        html += `<td>${isNaN(cell) ? "" : cell.toFixed(0)}</td>`;
-      });
+  const container = document.getElementById("completedTriangle");
+  let html = `<h3>${titleText}</h3><table>`;
 
-      html += "</tr>";
+  // Add column headers
+  html += "<tr><th></th>";
+  columnHeaders.forEach(header => {
+    html += `<th>${header}</th>`;
+  });
+  html += "</tr>";
+
+  // Loop through each row and cell
+  triangle.forEach((row, rowIndex) => {
+    html += `<tr><th>${rowHeaders[rowIndex]}</th>`;
+    row.forEach((cell, colIndex) => {
+      const isHighlighted = calculatedCells?.[rowIndex]?.[colIndex] ?? false;
+      const classAttr = isHighlighted ? ' class="highlight"' : "";
+      html += `<td${classAttr}>${isNaN(cell) ? "" : cell.toFixed(0)}</td>`;
     });
-    html += "</table>";
-    container.innerHTML = html;
-  }
+    html += "</tr>";
+  });
 
+  html += "</table>";
+  container.innerHTML = html;
+}
   function displayDevFactors(factors) {
     const container = document.getElementById("devFactorsOutput");
     let html = "<h3> Development Factors </h3><table><tr>"
