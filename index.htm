@@ -5,71 +5,80 @@
     <meta name="viewport" content = "width= device-width, initial-scale=1.0"/>
     <title>Aneliswa</title>
     <link rel="icon" href="Favicon.jpeg" type="image/jpeg">
-    <style>
-        body {
-            font-family: "Comic Sans Ms";
-            background-color: white;
-            margin: 0;
-            padding: 0px;
-            
-        }
-        header {
-            background-color: powderblue;
-            font-family: "cursive";
-            display: flex;
-            justify-content:space-between;
-            color: white;
-            padding: 20px;
-            align-items:center;
-            text-align: left;
-            font-size: 200%;
-            font-weight: bold;
-            width:500px
-           
-        }
-        section {
-            padding: 20px;
-            background-color: powderblue;
-            margin: 0px;
-            width: 500px;
-            height: 350px;
-            color:white;
-            
+    <style>body {
+  font-family: "Comic Sans MS", cursive;
+  background-color: white;
+  margin: 0;
+  padding: 0;
+}
 
-        }
-        h2 {
-            color: white;
-            font-size: 500%;
-            font-family: "Eras ITC";
-            text-align: center
-        }
-        h3{
-            color: white;
-            font-size: 160%;
-            font-family: "Eras ITIC";
-            text-align: center;
-        }
-      nav{
-           
-            margin-left:0px;
-            text-align: right;
-            font-family: "Eras ITC";
-            color:powderblue;
-          font-size: 200%;
-          border: 2px solid powderblue;
-           
-        }
-        a{
-            text-decoration:none;
-            color: powderblue;
-            font-size: 160%;
-            margin-right: 15px;
-        }
-        footer{
-            background-color: powderblue;
-            color:white;
-        }
-        @keyframes slideInFromLeft {
+header {
+  background-color: powderblue;
+  color: white;
+  padding: 20px;
+  font-size: 200%;
+  font-weight: bold;
+  text-align: left;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+section {
+  padding: 20px;
+  background-color: powderblue;
+  margin: 0;
+  color: navy;
+}
+
+h2 {
+  color: white;
+  font-size: 3em;
+  text-align: center;
+}
+
+h3 {
+  color: white;
+  font-size: 1em;
+  text-align: center;
+}
+
+nav {
+  text-align: right;
+  font-family: "Eras ITC", sans-serif;
+  font-size: 1.2em;
+  padding: 10px;
+  border: 2px solid powderblue;
+}
+
+a {
+  text-decoration: none;
+  color: powderblue;
+  font-size: 1.2em;
+  margin-right: 15px;
+}
+
+nav a:hover {
+  background-color: powderblue;
+  color: black;
+}
+
+footer {
+  background-color: powderblue;
+  color: navy;
+  padding: 20px;
+  text-align: center;
+}
+
+.animate-float {
+  animation: slideInFromLeft 3s ease-out forwards;
+}
+
+.animate-slide {
+  animation: slideInFromAbove 1s ease-out forwards;
+}
+
+@keyframes slideInFromLeft {
   0% {
     opacity: 0;
     transform: translateX(-50px);
@@ -80,11 +89,7 @@
   }
 }
 
-.animate-float {
-  animation: slideInFromLeft 3s ease-out forwards;
-}
-
-         @keyframes slideInFromAbove {
+@keyframes slideInFromAbove {
   0% {
     opacity: 0;
     transform: translateY(-50px);
@@ -95,9 +100,52 @@
   }
 }
 
-.animate-slide {
-  animation: slideInFromAbove 2s ease-out forwards;
+/* ✅ Mobile Responsive Design */
+@media screen and (max-width: 768px) {
+  header,
+  section,
+  nav,
+  .project-container {
+    width: 100%;
+    flex-direction: column;
+    text-align: center;
+  }
+
+  div[style*="display: flex"] {
+    flex-direction: column !important;
+    align-items: center;
+  }
+
+  div[style*="width: 200px"] {
+    width: 100% !important;
+    margin-bottom: 10px;
+  }
+
+  p.animate-float {
+    width: 100% !important;
+    padding: 0 10px;
+    font-size: 1em;
+  }
+
+  nav {
+    text-align: center;
+    padding: 10px 0;
+  }
+
+  nav a {
+    display: block;
+    margin: 10px 0;
+  }
+
+  h2 {
+    font-size: 2em;
+  }
+
+  h3 {
+    font-size: 1em;
+  }
 }
+
     </style>
 </head>
 <body>
