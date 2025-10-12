@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Games | Aneliswa Hlongwa</title>
+<link rel="stylesheet" href="style.css">
+
+</head>
+
+<body class="games" >
+    <div style="text-align:left;width:100%;">
+<a href="Projects.html" style="border-radius:50%;border: 1px solid pink; text-decoration:none; padding: 8px 12px; color:blue; display:inline-block;">⇦Back</a>
+</div>
+<section style="text-align:center;">
+    <div class="shape" style="left:10%;">🍀</div>
+  <div class="shape" style="left:20%; animation-delay:1s;">🍁</div>
+  <div class="shape" style="left:30%; animation-delay:2s;">🍂 </div>
+  <div class="shape" style="left:45%; animation-delay:3s;">🌿</div>
+  <div class="shape" style="left:25%; animation-delay:5s;">📖</div>
+  <div class="shape" style="left:65%; animation-delay:6s;"> 🌳</div>
+<div class="shape" style="left:70%; animation-delay:8s;">🌱</div>
+  <div class="shape" style="left:85%; animation-delay:10s;">🎧</div>
+  <div class="shape" style="left:95%; animation-delay:9s;">🎥</div>
+  <div class="shape" style="left:50%; animation-delay:3s;">🍃 </div>
+  <div class="shape" style="left:75%; animation-delay:4s;"> ❤️</div>
+  </section>
+
+    <section class="hidden">
+        <div class="projects-container">
+            <div class="project-card">
+              <img src="Sudoku.jpeg" alt="Sudoku Game Picture">
+              <h3>Sudoku Game</h3>
+                    <p></p>
+    <div class="lang-box-container">
+    <div class="lang-box">html</div>    
+    <div class="lang-box">JavaScript</div>
+    <div class= "lang-box">CSS</div>
+    </div>
+    
+              <a href="sudoku.html" class="project-link">Play Game</a>
+            </div>
+            <div class="project-card">
+              <img src="Snake.jpeg" alt="Snake Game Picture">
+              <h3>Snake Game</h3>
+              <p></p>
+              <div class="lang-box-container">
+                <div class="lang-box">html</div>    
+                <div class="lang-box">JavaScript</div>
+                <div class= "lang-box">CSS</div>
+                </div>
+                <a href="snake.html" class="project-link">Play Game</a>
+                </div>
+        </div>
+    </section>
+
+    <script>
+        const hiddenElements = document.querySelectorAll('.hidden');
+        
+        function checkScroll() {
+          const triggerPoint = window.innerHeight * 0.85;
+        
+          hiddenElements.forEach(el => {
+            const elementTop = el.getBoundingClientRect().top;
+            if (elementTop < triggerPoint) {
+              el.classList.add('show');
+            } else {
+              el.classList.remove('show');
+            }
+          });
+        }
+        
+        window.addEventListener('scroll', checkScroll);
+        // Initial check in case elements are already in view
+        checkScroll();
+        </script>
+</body>
+</html>

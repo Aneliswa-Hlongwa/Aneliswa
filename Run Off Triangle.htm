@@ -1,0 +1,264 @@
+<!DOCTYPE>
+<html>
+<head>
+<meta charset="UTF-8">
+<title> Run Off Triangle 
+</title>
+<link rel="stylesheet" href="style.css">
+<script 
+src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"> </script>
+
+<style > 
+    .dropdown-content {
+      display: none;
+      position: absolute;
+      background-color: grey;
+      box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+      padding: 30px;
+      border-radius: 0px;
+    }
+
+    .dropdown-content button {
+      display: block;
+      margin: 5px 0;
+    }
+
+    .show {
+      display: block;
+    }
+  
+.file-upload-container {
+      display: flex;
+      align-items: center; 
+      justify-content: flex-start; 
+    }
+    input[type="file"], button {
+      padding: 10px;
+      margin-top: 10px;
+border-radius:  30px;
+background-color:teal;
+    }
+    table {
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    table, th, td {
+      border: 1px solid #999;
+      padding: 8px;
+    }
+    th {
+      background-color: #f4f4f4;
+    }
+
+    #output, #completedTriangle, #devFactorsOutput, #totalReserves{
+      margin-top: 20px;
+    }
+
+
+.highlight {
+background-color: pink;
+font-weight: bold
+}
+</style>
+
+</head>
+
+<body class="projects">
+
+<section style="margin-top:200px;">
+<h1>Reserves Projection: Run-Off Triangle</h1>
+<p1>This tool helps compute development factors based on the input data, allowing users to complete and project values in a run-off triangle. <br>
+  The user must ensure the input data is a csv or xlsx file.</p1>
+</section>
+
+
+<div class="shape triangle" style="left:10%;"></div>
+  <div class="shape triangle" style="left:70%; animation-delay:5s;"></div>
+  <div class="shape bell-curve" style="left:40%; animation-delay:10s;"></div>
+  <div class="shape bell-curve" style="left:85%; animation-delay:15s;"></div>
+  <div class="shape" style="left:25%; animation-delay:8s;">Σ</div>
+  <div class="shape" style="left:60%; animation-delay:12s;">Σ</div>
+
+<nav  class="projects">
+<ul>
+    <li><a href="index.html"  class="projects"><h3>Home</h3></a></li>
+    <li><a href="Aneliswa Hlongwa-Curriculum Vitae.pdf" target="_blank"  class="projects"><h3>Resume</h3></a></li>
+    <li><a href="Projects.html"  class="projects"><h3>Projects</h3></a></li>
+    <li><a href="about.html"  class="projects"> <h3>About</h3></a></li>
+  </ul>
+</nav>
+
+<div class="file-upload-container">
+    <label for="fileInput">Upload Your Data:</label>
+    <input type="file" id="fileInput" accept=".csv,.xlsx">
+  </div>
+  
+  <br>
+<p><i> Note: Please upload a .csv or xlsx file</i> </p>
+
+
+<button onclick="toggleDropdown()">Choose Option</button>
+
+<div id ="output"></div>
+
+
+<div id="completedTriangle"></div>
+<div id="devFactorsOutput"></div>
+
+  <div id="dropdown" class="dropdown-content">
+    <button onclick="doDevelopmentCalc()">Development factors</button>
+    <button onclick="doCompleteTriangle()">Complete the Run off Triangle</button>
+      </div>
+<script>
+let calculatedCells = [];
+let numericTriangle = [];
+  let devFactors = [];
+  let numRows = 0;
+  let numCols = 0;
+let columnHeaders = [];
+let rowHeaders = [];
+
+    function toggleDropdown() {
+      document.getElementById("dropdown").classList.toggle("show");
+    }
+function doDevelopmentCalc() {
+const file = document.getElementById('fileInput').files[0];
+
+
+if (!file){ alert('Please select a file first.');
+        return;
+  }
+const extension = file.name.split('.').pop().toLowerCase();
+
+if (extension === 'csv'){
+Papa.parse(file, {
+complete: function(results){
+processData(results.data);
+}
+  });
+} else if (extension === 'xlsx'){
+const reader= new FileReader();
+reader.onload = function(e){
+const data = new Uint8Array(e.target.result);
+const workbook = XLSX.read(data, { type: 'array' });
+          const sheet = workbook.Sheets[workbook.SheetNames[0]];
+          const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+          processData(jsonData);
+}
+reader.readAsArrayBuffer(file);
+  } else { 
+alert('only .csv or .xlsx files are supported.')
+    }
+
+}
+
+function processData(data){
+
+const cleanedData = data.filter(row => row.some(cell => cell !== "" && cell != null));
+
+columnHeaders = cleanedData[0].slice(1);
+rowHeaders = cleanedData.slice(1).map(row => row[0]);
+const triangle = cleanedData.slice(1).map(row=> row.slice(1));
+
+ numRows = triangle.length;
+
+numCols = triangle[0]?.length || 0;
+
+
+
+ numericTriangle = triangle.map(row => row.map(cell => Number(cell)));
+
+
+ devFactors = [];
+
+for ( let col = 0; col< numCols -1 ; col++){
+let numerator = 0;
+let denominator = 0; 
+
+for (let row=0; row < numRows -col-1; row++){ 
+const current = numericTriangle[row][col];
+const next = numericTriangle[row][col+1];
+
+if (!isNaN(current)&& !isNaN(next)){
+numerator+= next;
+denominator+= current
+
+   }
+ }
+
+const factor = denominator !== 0? numerator/denominator :1
+devFactors.push(factor);
+}
+
+displayDevFactors(devFactors);
+displayCompletedTriangle(triangle, "Uncompleted Run-off Triangle");
+
+
+}
+
+function doCompleteTriangle() {
+
+calculatedCells = Array.from({ length: numRows }, () => Array(numCols).fill(false));
+
+for(let col=0 ; col< numCols-1 ; col++) {   
+ 
+for (let row=0 ; row < numRows ; row++){   
+const current = numericTriangle[row][col];
+const next =numericTriangle[row][col+1];
+
+
+if ( isNaN (next)&&!isNaN(current)){
+numericTriangle[row][col+1] = current*devFactors[col];
+    calculatedCells[row][col + 1] = true;
+      }
+     }
+ }
+  displayCompletedTriangle(numericTriangle,"Completed Run-off Triangle" );
+}
+
+function displayCompletedTriangle(triangle, titleText) {
+  const container = document.getElementById("completedTriangle");
+  let html = `<h3>${titleText}</h3><table>`;
+
+  
+  html += "<tr><th></th>";
+  columnHeaders.forEach(header => {
+    html += `<th>${header}</th>`;
+  });
+  html += "</tr>";
+  triangle.forEach((row, rowIndex) => {
+    html += `<tr><th>${rowHeaders[rowIndex]}</th>`;
+    row.forEach((cell, colIndex) => {
+      const isHighlighted = calculatedCells?.[rowIndex]?.[colIndex] ?? false;
+      const classAttr = isHighlighted ? ' class="highlight"' : "";
+      html += `<td${classAttr}>${isNaN(cell) ? "" : cell.toFixed(0)}</td>`;
+    });
+    html += "</tr>";
+  });
+
+  html += "</table>";
+  container.innerHTML = html;
+}
+
+  function displayDevFactors(factors) {
+    const container = document.getElementById("devFactorsOutput");
+    let html = "<h3> Development Factors </h3><table><tr>"
+factors.forEach(factor=> { 
+html+= `<td>${factor.toFixed(5)}</td>`
+  });
+
+html += "</tr></table>";
+container.innerHTML = html
+  }
+  </script>
+
+<footer>
+    © 2025 Aneliswa Hlongwa. All rights reserved.
+  </footer>
+
+</body>  
+
+
+</html>

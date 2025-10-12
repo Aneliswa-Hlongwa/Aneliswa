@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Snake Game</title>
+
+<style>
+  body {
+    background: linear-gradient(to bottom right, black, pink, black);
+    background-attachment: fixed;
+    color: pink;
+    font-family: fantasy;
+   text-align: center;
+   align-items: center;
+   overflow: hidden;
+  }
+  .snake-grid {
+    width: 400px;
+    height: 350px;
+    border: 2px solid wheat;
+    border-radius: 5px;
+    padding: 20px;
+    position: relative;
+    box-shadow: 0 0 10px rgba(185, 79, 162, 0.3);
+    margin: 20px auto;
+  }
+  #snake-head {
+    background-color: black;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    position: absolute;
+  }
+  .snake-body {
+    background: linear-gradient(to top right, black, hsl(350, 34%, 17%), black);
+    width: 10px;
+    height: 15px;
+    border-radius: 40%;
+    position: absolute;
+  }
+  #food {
+    background-color: red;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    position: absolute;
+  }
+ #game-over {
+    display:none;
+    position: absolute;
+    top: 50%;   
+    left:50%;
+    background-color:pink;
+    color:wheat;
+    padding: 20px;
+    border-radius: 10px;
+    border:2px solid wheat;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    font-size:24px;
+ }
+    
+    #score{
+        padding: 2px;
+        background: linear-gradient(to bottom right, black, pink, black);
+        border-radius: 10px;
+        border: 2px solid wheat;
+        color: wheat;
+        font-size: 20px;
+        font-weight: bold;
+    }
+    #pause-btn{
+       padding: 2px;
+        background: linear-gradient(to bottom right, black, pink, black);
+        border-radius: 10px;
+        border: 2px solid wheat;
+        color: wheat;
+        font-size: 20px;
+        font-weight: bold;
+        cursor:grab;
+    }
+    #big-food{
+        background: linear-gradient(to top right, red,pink, darkred);
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    position: absolute;
+;
+    }
+    #big-food-timer{
+        color: wheat;
+        font-size: 12px;
+        font-weight: bold;
+        background:linear-gradient(to bottom right, black, pink, black);
+        border-radius: 5px;
+        text-align: center;
+        }
+        #start-btn{
+            padding: 10px;
+            background: linear-gradient(to bottom right, black, pink, black);
+            border-radius: 10px;
+            cursor: grab;
+            color:white;
+        
+        }
+        #instructions{
+            font-size: 14px;
+            color: white;
+            background: linear-gradient(to bottom right, black, pink, black);
+            border-radius: 10px;
+            cursor:pointer
+        }
+
+</style>
+</head>
+
+<body>
+<h1>Snake Game</h1>
+<button id="start-btn">Start Game</button>
+<p id="instructions">Use Arrow Keys to Move. <br> Press 'P' to Pause/Resume. <br> Press Space to Restart after Game Over.</p>
+<button id="pause-btn" style="display:none;">Pause</button>
+<span id ="score" style="display:none;">Score: 0</span>
+<div id="big-food-timer" style="display:none">Time: 10s</div>
+<div class="snake-grid" style="display: none;">
+  <div id="snake-head"></div>
+  <div id="food"></div>
+  <div id="big-food" style="display:none;"></div>
+  <div id="game-over">Game Over! <br> <small>Press Space to Restart</small></div>
+</div>
+
+<script>
+let grid = document.querySelector('.snake-grid');
+let snakeHead = document.getElementById('snake-head');
+let food = document.getElementById('food');
+let gameOver = document.getElementById('game-over');
+let score = document.getElementById('score');
+let bonusFood = document.getElementById('big-food');  
+let bonusTimer;
+let bonusTimeLimit = 10;
+let bonusTimeLeft = bonusTimeLimit;
+
+
+
+let snakeParts = [snakeHead];
+let direction = 'ArrowRight';
+let lastDirection = direction;
+let interval ;
+let speed= 150;
+
+// initial position
+snakeHead.style.top = "50px";
+snakeHead.style.left = "50px";
+
+// random food placement
+function foodplacement() {
+  let foodTop = Math.floor(Math.random() * ((grid.clientHeight - 10) / 10)) * 10;
+  let foodLeft = Math.floor(Math.random() * ((grid.clientWidth - 10) / 10)) * 10;
+  food.style.top = foodTop + "px";
+  food.style.left = foodLeft + "px";
+}
+// control
+document.addEventListener('keydown', (e) => {
+  const validKeys = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'];
+  if (validKeys.includes(e.key)) {
+    if (
+      (e.key === 'ArrowUp' && lastDirection !== 'ArrowDown') ||
+      (e.key === 'ArrowDown' && lastDirection !== 'ArrowUp') ||
+      (e.key === 'ArrowLeft' && lastDirection !== 'ArrowRight') ||
+      (e.key === 'ArrowRight' && lastDirection !== 'ArrowLeft')
+    ) {
+      direction = e.key;
+    }
+  }
+  if ( e.code === 'Space') restartGame();
+  if ( e.key === 'p' || e.key === 'P') pauseBtn.click();
+});
+
+// bonus food placement
+function placeBonusFood() {
+    let bonusTop = Math.floor(Math.random() * ((grid.clientHeight - 20) / 10))* 10;
+    let bonusLeft = Math.floor(Math.random() * ((grid.clientWidth - 20) / 10)) * 10;
+    bonusFood.style.top = bonusTop + "px";
+    bonusFood.style.left = bonusLeft + "px";
+    bonusFood.style.display = 'block';
+
+    // Start bonus food timer
+    const bonusTimerDisplay = document.getElementById('big-food-timer');
+    bonusTimerDisplay.style.display = 'block';
+    bonusTimeLeft = bonusTimeLimit;
+    bonusTimerDisplay.textContent = bonusTimeLeft + 's';
+
+    clearInterval(bonusTimer);
+    bonusTimer = setInterval(() => {
+        bonusTimeLeft--;
+        bonusTimerDisplay.textContent = bonusTimeLeft + 's';
+        if (bonusTimeLeft <= 0) {
+            clearInterval(bonusTimer);
+            bonusFood.style.display = 'none';
+            bonusTimerDisplay.style.display = 'none';
+        }
+    }, 1000);
+}
+// Score functionality
+let currentScore = 0;
+const scoreIncrement = 2; // Points per food
+let foodsEaten = 0;
+
+function updateScore() {
+    currentScore += scoreIncrement;
+    score.textContent = 'Score: ' + currentScore;
+}
+
+// movement loop
+function moveSnake() {
+  let prevPositions = snakeParts.map(part => ({
+    top: part.style.top,
+    left: part.style.left
+  }));
+
+  let top = parseInt(snakeHead.style.top);
+  let left = parseInt(snakeHead.style.left);
+
+  if (direction === "ArrowUp") top -= 10;
+  if (direction === "ArrowDown") top += 10;
+  if (direction === "ArrowLeft") left -= 10;
+  if (direction === "ArrowRight") left += 10;
+
+  //wall collision
+  if (top < 0 || top >= grid.clientHeight || left < 0 || left >= grid.clientWidth ) {
+    endGame();
+    return;
+  }
+  //move head
+  snakeHead.style.top = top + "px";
+  snakeHead.style.left = left + "px";
+
+  //move body
+  for (let i = 1; i < snakeParts.length; i++) {
+    snakeParts[i].style.top = prevPositions[i - 1].top;
+    snakeParts[i].style.left = prevPositions[i - 1].left;
+  }
+
+  //self collission
+
+  for (let i = 1; i < snakeParts.length; i++) {
+    if (
+      snakeHead.style.top === snakeParts[i].style.top &&
+      snakeHead.style.left === snakeParts[i].style.left
+    ) {
+      endGame();
+      return;
+    }
+  }
+  // food collision
+  if (
+    Math.abs(parseInt(snakeHead.style.top) - parseInt(food.style.top)) < 10 &&
+    Math.abs(parseInt(snakeHead.style.left) - parseInt(food.style.left)) < 10
+  ) {
+    foodplacement();
+    let lastPart = snakeParts[snakeParts.length - 1];
+    let newBodyPart = document.createElement('div');
+    newBodyPart.classList.add('snake-body');
+    newBodyPart.style.top = lastPart.style.top;
+    newBodyPart.style.left = lastPart.style.left;
+    grid.appendChild(newBodyPart);
+    snakeParts.push(newBodyPart);
+
+    updateScore();
+    foodsEaten++;
+
+    if (foodsEaten % 5 === 0) {
+        placeBonusFood();
+    }
+  }
+  // bonus food collision
+
+if (
+    bonusFood.style.display === 'block' &&
+    Math.abs(parseInt(snakeHead.style.top) - parseInt(bonusFood.style.top)) < 20 &&
+    Math.abs(parseInt(snakeHead.style.left) - parseInt(bonusFood.style.left)) < 20
+  ) {
+    bonusFood.style.display = 'none';
+    clearInterval(bonusTimer);
+    document.getElementById('big-food-timer').style.display = 'none';
+
+    let lastPart = snakeParts[snakeParts.length - 1];
+    let newBodyPart = document.createElement('div');
+    newBodyPart.classList.add('snake-body');
+    newBodyPart.style.top = lastPart.style.top;
+    newBodyPart.style.left = lastPart.style.left;
+    grid.appendChild(newBodyPart);
+    snakeParts.push(newBodyPart);
+
+    currentScore += 5;
+    score.textContent = 'Score: ' + currentScore;
+  }
+
+  //speed increase 
+if (currentScore % 50 === 0 && currentScore !== 0) {
+    clearInterval(interval);
+    speed = Math.max(50, speed - 10); // 
+    interval = setInterval(moveSnake, speed);
+ }
+ if (gameOver.style.display === 'block') return
+
+ //directional reversal
+   lastDirection = direction;
+
+}
+    
+
+// start game
+document.getElementById('start-btn').addEventListener('click', () => {
+  grid.style.display = 'block';
+  document.getElementById('start-btn').style.display = 'none';
+  document.getElementById('instructions').style.display = 'none';
+  document.getElementById('pause-btn').style.display = 'inline-block';
+  score.style.display = 'inline-block';
+  clearInterval(interval);
+  foodplacement();
+  interval = setInterval(moveSnake, speed); 
+});
+// end game
+function endGame() {
+  clearInterval(interval);
+  clearInterval(bonusTimer);
+  document.getElementById('big-food-timer').style.display = 'none';
+  gameOver.style.display = 'block';
+
+  
+};
+function restartGame() {
+  gameOver.style.display = 'none';
+  snakeParts.forEach((part, i) => { if (i > 0) part.remove(); });
+  snakeParts = [snakeHead];
+  snakeHead.style.top = "50px";
+  snakeHead.style.left = "50px";
+  direction = 'ArrowRight';
+  foodplacement();
+  clearInterval(interval);
+  clearInterval(bonusTimer);
+document.getElementById('big-food-timer').style.display = 'none';
+speed = 150;
+interval = setInterval(moveSnake, speed);
+  currentScore = 0;
+  score.textContent = 'Score: 0 ' ;
+  bonusFood.style.display = 'none';
+  foodsEaten = 0;
+  
+
+}
+
+
+// Pause functionality
+let paused= false;
+const pauseBtn = document.getElementById('pause-btn');
+
+pauseBtn.addEventListener('click', () => {
+    if (gameOver.style.display === 'block') return;
+    if (!paused) {
+        clearInterval(interval);
+        clearInterval(bonusTimer);
+        pauseBtn.textContent = 'Resume';
+        paused=true;
+    } else {
+        interval = setInterval(moveSnake, speed);
+        pauseBtn.textContent = 'Pause';
+        paused= false;
+    }
+});
+// Space key to pause/resume
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'p' || e.key === 'P') {
+        pauseBtn.click();
+    }
+}); 
+      
+</script>
+</body>
+</html>

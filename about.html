@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" href="ICON.jpeg">
+<title> About Me | Aneliswa Hlongwa
+</title>
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body class="about">
+
+
+<div class="shape" style="left:10%;">🍀</div>
+  <div class="shape" style="left:20%; animation-delay:1s;">🍁</div>
+  <div class="shape" style="left:30%; animation-delay:2s;">🍂 </div>
+  <div class="shape" style="left:45%; animation-delay:3s;">🌿</div>
+  <div class="shape" style="left:25%; animation-delay:5s;">🍃 </div>
+  <div class="shape" style="left:65%; animation-delay:6s;"> 🌳</div>
+<div class="shape" style="left:70%; animation-delay:8s;">🌱</div>
+  <div class="shape" style="left:85%; animation-delay:10s;">🌵</div>
+  <div class="shape" style="left:95%; animation-delay:9s;">🎍</div>
+  <div class="shape" style="left:50%; animation-delay:3s;">🍃 </div>
+  <div class="shape" style="left:75%; animation-delay:4s;"> 🌴</div>
+
+<nav class="about">
+<ul>
+    <li><a href="index.html" class="about"><h3>Home</h3></a></li>
+    <li><a href="Aneliswa Hlongwa-Curriculum Vitae.pdf" target="_blank" class="about"><h3>Resume</h3></a></li>
+    <li><a href="Projects.html" class="about"><h3>Projects</h3></a></li>
+    <li><a href="about.html" class="about"><h3>About</h3></a></li>
+  </ul>
+</nav>
+
+<section class="intro-section">
+<div class="box">
+<h1 class="about-fading-border"> Aneliswa Hlongwa</h1>
+<p>🌿Plant Lover • 💻Tech Enthusiast •📚 Reader</p>
+</div>
+</section>
+
+<section style="margin-bottom:150px;">
+
+ <div>
+
+<div class="about-container">
+<img src="Aneh.JPG" alt="Aneliswa Hlongwa">
+
+<div class="about-card">
+<h1>Who am I?</h1>
+<p>Hi! I’m Aneliswa Hlongwa — an Actuarial Science graduate who loves exploring the world of programming. I’m curious, driven, and passionate about turning ideas into real, working projects.</p>
+<p>When I’m not coding, you’ll find me lost in a good book, binge-watching films, or listening to podcasts. I’m also a big fan of nature and plants — they bring me joy and inspiration.</p>
+<p>Feel free to explore <a href="Projects.html" style="text-decoration: none;">my projects</a> and get in touch if you’d like to connect!</p>
+</div>
+  </div>
+
+</div>
+</section>
+
+
+<section class="timeline-container hidden">
+<h1 class="about-fading-border"> My Journey </h1>
+
+<div class="timeline-card">
+<h2> High School (2017-2021)</h2>
+<ul>
+<li>Attended Our Lady of the Rosary Secondary School(OLOTRY)</li>
+<li> 1st in Mathematics (OLOTRY)</li>
+<li>3rd Overall in Matric (OLOTRY)</li>
+<li>Top 10 in Ilembe district</li>
+<li>Top 5  in Ndwedwe Municipality</li>
+<li> Attended #CodelLikeAGirl in 2020</li>
+</ul>
+</div>
+<div class="timeline-card">
+
+<h2>University (2022-2024)</h2>
+<ul>
+<li>Attended University of Witswatersrand (Wits)</li>
+<li> Studied Bachelor of Science</li>
+<li> Majored in Actuarial Science and Mathematical Statistics</li>
+<li> Achieved Exemptions:  <br>
+ A214 <br>
+A112   <br>
+N111</li>
+
+</ul>
+</div>
+
+<div class="timeline-card">
+<h2>Career</h2>
+<ul>
+<li> Vacation Work at KPMG </li>
+<li> Actuarial Student (ASSA)</li>
+</ul>
+</div>
+</section>
+
+<section class="hidden" style="margin-bottom:20px;">
+<div class="links">
+<a href="mailto:aneliswahlongwa@gmail.com" style="background-color: green; border: 1px solid pink; ">Email Me</a>
+<a href="#linkedIn" style="background-color: green; border:1px solid pink;" >LinkedIn</a>
+</div>
+</section>
+
+<footer>
+    © 2025 Aneliswa Hlongwa. All rights reserved.
+  </footer>
+
+<script>
+const hiddenElements = document.querySelectorAll('.hidden');
+
+function checkScroll() {
+  const triggerPoint = window.innerHeight * 0.85;
+
+  hiddenElements.forEach(el => {
+    const elTop = el.getBoundingClientRect().top;
+    if(elTop < triggerPoint) {
+      el.classList.add('show');
+    } else {
+      el.classList.remove('show'); // optional
+    }
+  });
+}
+
+window.addEventListener('scroll', checkScroll);
+checkScroll();
+</script>
+
+
+</body>
+
+
+</html>

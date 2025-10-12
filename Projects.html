@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" href="ICON.jpeg">
+<title>Projects | Aneliswa Hlongwa</title>
+<link rel="stylesheet" href="style.css">
+</head>
+
+
+<body class="projects" >
+
+<div class="shape triangle" style="left:10%;"></div>
+  <div class="shape triangle" style="left:70%; animation-delay:5s;"></div>
+  <div class="shape bell-curve" style="left:40%; animation-delay:10s;"></div>
+  <div class="shape bell-curve" style="left:85%; animation-delay:15s;"></div>
+  <div class="shape" style="left:25%; animation-delay:8s;">Σ</div>
+  <div class="shape" style="left:60%; animation-delay:12s;">Σ</div>
+
+<nav class="projects">
+<ul>
+    <li><a href="index.html" class="projects"><h3>Home</h3></a></li>
+    <li><a href="Aneliswa Hlongwa-Curriculum Vitae.pdf" target="_blank"  class="projects"><h3>Resume</h3></a></li>
+    <li><a href="Projects.html"  class="projects"><h3>Projects</h3></a></li>
+    <li><a href="about.html"  class="projects"><h3>About</h3></a></li>
+  </ul>
+</nav>
+
+<section class="intro-section">
+ <div class="box">
+    <h1 class="fading-border">My Projects</h1>
+<p>Explore projects I’ve built to practice actuarial modelling, coding, and problem-solving.</p>
+  </div>
+ </section>
+
+<section>
+
+  <div class="hidden">
+    <div class="projects-container">
+      <div class="project-card">
+        <img src="EBTC Model.PNG" alt="EBCT Model Picture">
+        <h3>EBCT Model 1 tool</h3>
+              <p></p>
+<div class="lang-box-container">
+<div class="lang-box">html</div>
+<div class="lang-box">JavaScript</div>
+<div class= "lang-box">CSS</div>
+<div class="lang-box">Actuarial Statistics</div>
+</div>
+
+        <a href="Claims Projections.htm" class="project-link">View Project</a>
+      </div>
+
+      <div class="project-card">
+        <img src="Run-off Triangle.PNG" alt="Run-off Picture">
+        <h3>Run-off Triangle tool</h3>
+        <p></p>
+<div class="lang-box-container">
+<div class="lang-box">html</div>
+<div class="lang-box">JavaScript</div>
+<div class= "lang-box">CSS</div>
+<div class="lang-box">Insurance</div>
+</div>
+        <a href="Run Off Triangle.htm" class="project-link">View Project</a>
+      </div>
+</div>
+</div>
+</section>
+
+<section>
+<div class ="hidden">
+<div class="projects-container">
+      <div class="project-card">
+        <img src="website picture.jpg" alt="Project 3 Image">
+        <h3>Personal Website</h3>
+        <p></p>
+<div class="lang-box-container">
+<div class="lang-box">html</div>
+<div class="lang-box">JavaScript</div>
+<div class= "lang-box">CSS</div>
+</div>
+        <a href="index.html" class="project-link">View Project</a>
+      </div>
+
+      <div class="project-card">
+        <img src="SQL Picture.jpeg" alt="Project 2 Image">
+        <h3>SQL Practice</h3>
+             <p></p>
+<div class="lang-box-container">
+<div class="lang-box">SQL</div>
+<div class="lang-box">MSWord</div>
+<div class= "lang-box">Power BI</div>
+</div>
+
+        <a href="sql project.html" class="project-link">View Project</a>
+      </div>
+
+</div>
+</div>
+    </section>
+
+
+<section>
+<div class ="hidden">
+<div class="projects-container">
+      <div class="project-card">
+        <img src="Games.jpeg" alt="Games Picture">
+        <h3>More Projects</h3>
+             <p>Dive into the world of programming</p>
+<div class="lang-box-container">
+<div class="lang-box">html</div>
+<div class="lang-box">JavaScript</div>
+<div class= "lang-box">CSS</div>
+</div>
+        <a href="games.html" class="project-link">View Project</a>
+      </div>
+</section>
+
+
+
+<section class="hidden" style="margin-top:100px;">
+<div class="links">
+<a href="mailto:aneliswahlongwa@gmail.com">Email Me</a>
+<a href="https://www.linkedin.com/in/aneliswa-hlongwa">LinkedIn</a>
+</div>
+</section>
+
+
+<footer class="hidden">
+    © 2025 Aneliswa Hlongwa. All rights reserved.
+  </footer>
+
+
+
+<script>
+const hiddenElements = document.querySelectorAll('.hidden');
+
+function checkScroll() {
+  const triggerPoint = window.innerHeight * 0.85;
+
+  hiddenElements.forEach(el => {
+    const elTop = el.getBoundingClientRect().top;
+    if(elTop < triggerPoint) {
+      el.classList.add('show');
+    } else {
+      el.classList.remove('show'); // optional
+    }
+  });
+}
+
+window.addEventListener('scroll', checkScroll);
+checkScroll();
+</script>
+
+</body>
+</html>

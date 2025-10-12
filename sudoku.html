@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sudoku Game</title>
+<style>
+  body {
+    font-family: fantasy;
+    background: linear-gradient(to bottom right, teal, pink, lightblue);
+    margin: 0;
+    padding: 20px;
+    background-attachment: fixed;
+  }
+  h1 {
+    text-align: center;
+    color: #333;
+  }
+  .game-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+.grid-container {
+    display: flex;
+    justify-content: center;
+    align-items:flex-start;
+    margin-bottom:20px;
+    gap:20px;
+  }
+  .options {
+    margin-bottom: 20px;
+  }
+  .game {
+    max-width: 500px;
+    margin: 0 auto;
+    background: linear-gradient(to bottom left,teal, teal, lightblue);
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid teal;
+    box-shadow: 0 0 10px rgba(102, 183, 237, 0.1);
+    display: none;
+  }
+  .sudoku-grid {
+    display: grid;
+    grid-template-columns: repeat(9, 1fr);
+    gap: 0;
+    border: 3px solid teal;
+  }
+  .sudoku-cell {
+    width: 50px;
+    height: 50px;
+    text-align: center;
+    font-size: 18px;
+    box-sizing: border-box;
+    border: 2px solid teal;
+  }
+/* right border after 3n+1*/
+    .sudoku-cell:nth-child(3n+1){
+      border-left: 3px solid rgb(12, 167, 219);
+      
+    }
+  .sudoku-cell:nth-child(n+19):nth-child(-n+27),
+  .sudoku-cell:nth-child(n+46):nth-child(-n+54) {
+    border-bottom: 3px solid #000;
+  }
+
+.sudoku-cell:nth-child(n+28):nth-child(-n+36),
+.sudoku-cell:nth-child(n+55):nth-child(-n+63) {
+  border-top: 5px solid rgb(12, 167, 219);
+}
+ 
+  .sudoku-cell input {
+    width: 100%;
+    height: 100%;
+    border: none;
+    text-align: center;
+    font-size: 18px;
+    background-color: #fff;
+    color: lightpink;
+  }
+  .sudoku-cell input:focus {
+    outline: none;
+    background-color: red;
+    transition: background-color 0.3s;
+  }
+  .controls {
+    text-align: center;
+    margin-top: 20px;
+  }
+  .controls button {
+    padding: 10px 20px;
+    font-size: 16px;
+    margin: 5px;
+    cursor: pointer;
+    border: none;
+    border-radius: 4px;
+    background-color: teal;
+    color: #fff;
+  }
+  .controls button:hover {
+    background-color: lightpink;
+  }
+</style>
+</head>
+<body>
+  <h1 style="color: pink; font-style: italic;">Sudoku Game</h1>
+  <div class="game-container">
+    <div class="grid-container">
+  <div class="options" style="background-color: lightpink;color:teal; padding: 10px; border-radius: 5px; margin-bottom: 20px;display: none;">
+      <label for="difficulty" >Select Difficulty: </label>
+      <select id="difficulty" onchange="setDifficulty(this.value)">
+        <option value="easy" selected>Easy</option>
+        <option value="medium">Medium</option>
+        <option value="hard">Hard</option>
+      </select>
+    </div>
+    <div class="timer-box" style="background-color: lightpink;color:teal; padding: 10px; border-radius: 5px; margin-bottom: 20px; border:1px solid teal;display: none;">
+    <span id="timer">⏱️ Time: 00:00</span>
+      <span id="bestTime">🏆 Best: --:--</span>
+    </div>
+    </div>
+    <div class="grid-container">
+      <div class="controls" style="background:linear-gradient(to right, teal, pink);color:teal;  border-radius: 5px;border:1px solid teal;">
+      <div id="gameButtons" style="display:none;">
+        <button onclick="checkSolution()">Check Solution</button>
+      <button onclick="resetGame()">Reset</button>
+      </div>
+      <button onclick="startGame(currentDifficulty)">Start Game</button>
+    </div>
+  <div class="game">
+    <div class="sudoku-grid" id="sudokuGrid"></div>
+    </div>
+    </div>
+</div>
+<script>
+  let puzzle = [];
+  let solution = [];
+  let currentDifficulty = 'easy';
+  let activeValue = '';
+let timerInterval;
+let startTime;
+let bestTime = localStorage.getItem('bestTime') || null;
+
+
+  function setDifficulty(level) {
+    currentDifficulty = level;
+    startGame(currentDifficulty);
+  }
+
+  function createEmptyBoard() {
+    return Array.from({ length: 9 }, () => Array(9).fill(''));
+  }
+
+  function isValid(board, row, col, num) {
+    for (let x = 0; x < 9; x++) {
+      if (board[row][x] === num || board[x][col] === num) return false;
+    }
+    const startRow = row - (row % 3);
+    const startCol = col - (col % 3);
+    for (let r = 0; r < 3; r++) {
+      for (let c = 0; c < 3; c++) {
+        if (board[startRow + r][startCol + c] === num) return false;
+      }
+    }
+    return true;
+  }
+
+  function solve(board) {
+    for (let row = 0; row < 9; row++) {
+      for (let col = 0; col < 9; col++) {
+        if (board[row][col] === '') {
+          for (let num = 1; num <= 9; num++) {
+            if (isValid(board, row, col, num)) {
+              board[row][col] = num;
+              if (solve(board)) return true;
+              board[row][col] = '';
+            }
+          }
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+
+  function shuffle(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+  }
+
+  function generateSolvedBoard() {
+    const board = createEmptyBoard();
+    for (let row = 0; row < 9; row++) {
+      for (let col = 0; col < 9; col++) {
+        const nums = [1,2,3,4,5,6,7,8,9];
+        shuffle(nums);
+        for (let n of nums) {
+          if (isValid(board, row, col, n)) {
+            board[row][col] = n;
+            if (solve(board)) return board;
+            board[row][col] = '';
+          }
+        }
+        return board;
+      }
+    }
+  }
+
+  function createPuzzle(board, difficulty = 35) {
+    const puzzle = board.map(row => row.slice());
+    let removed = 0;
+    while (removed < difficulty) {
+      const row = Math.floor(Math.random() * 9);
+      const col = Math.floor(Math.random() * 9);
+      if (puzzle[row][col] !== '') {
+        puzzle[row][col] = '';
+        removed++;
+      }
+    }
+    return puzzle;
+  }
+
+  function startGame(difficulty = 'easy') {
+    document.querySelector('.options').style.display = 'block';
+  document.querySelector('.timer-box').style.display = 'block';
+  document.querySelector('.game').style.display = 'block';
+  document.getElementById('gameButtons').style.display = 'block';
+  
+  //stopTimer(); // stop any existing timer
+  //startTimer(); // start a new timer
+
+  const solved = generateSolvedBoard();
+  solution = solved.map(row => row.slice());
+
+  let removed;
+  if (difficulty === 'medium') removed = 45;
+  else if (difficulty === 'hard') removed = 55;
+  else removed = 35;
+
+  puzzle = createPuzzle(solved, removed);
+  renderBoard(puzzle);
+  displayBestTime();
+
+  alert(`New ${difficulty.charAt(0).toUpperCase() + difficulty.slice(1)} game started!`);
+
+  // Start timer here
+  resumeTimerIfNeeded();
+}
+
+
+  function renderBoard(board) {
+    const grid = document.getElementById('sudokuGrid');
+    grid.innerHTML = '';
+
+    for (let row = 0; row < 9; row++) {
+      for (let col = 0; col < 9; col++) {
+        const cell = document.createElement('div');
+        cell.classList.add('sudoku-cell');
+        const input = document.createElement('input');
+        input.maxLength = 1;
+
+        if (board[row][col] !== '') {
+          input.value = board[row][col];
+          input.disabled = true;
+          input.style.backgroundColor = '#f0f0f0';
+        }
+
+        // highlight same numbers on click/input
+        input.addEventListener('input', e => {
+          activeValue = e.target.value;
+          highlightSimilar(activeValue);
+
+          if (activeValue === '') {
+            input.style.backgroundColor = '#fff';
+            return;
+            if (parseInt(activeValue) !== solution[row][col]) {
+              input.style.backgroundColor = '#ffcccc';
+            } else {
+              input.style.backgroundColor = '#ccffcc';
+            }
+          }
+
+          highlightConflicts(row,col, activeValue,input)
+        
+        });
+        input.addEventListener('focus', e => {
+          activeValue = e.target.value;
+          highlightSimilar(activeValue);
+        });
+
+        cell.appendChild(input);
+        grid.appendChild(cell);
+      }
+    }
+  }
+
+  function highlightConflicts(row, col, value, currentInput){
+    if (!value) return;
+    const inputs = document.querySelectorAll('.sudoku-cell input');
+  // Clear previous conflict highlights except for current input
+  inputs.forEach(input => {
+    if (input.disabled && input !== currentInput && !input.style.backgroundColor !== 'rgb(240, 240, 240)') {
+      input.style.backgroundColor = '#fff';
+    }
+  });
+  // Row and column
+  for (let i = 0; i < 9; i++) {
+    const rowIdx = row * 9 + i;
+    const colIdx = i * 9 + col;
+    if (inputs[rowIdx].value === value && inputs[rowIdx] !== currentInput) {
+      inputs[rowIdx].style.backgroundColor = '#ffe082'; // yellow for conflict
+    }
+    if (inputs[colIdx].value === value && inputs[colIdx] !== currentInput) {
+      inputs[colIdx].style.backgroundColor = '#ffe082';
+    }
+  }
+  // 3x3 box
+  const startRow = row - (row % 3);
+  const startCol = col - (col % 3);
+  for (let r = 0; r < 3; r++) {
+    for (let c = 0; c < 3; c++) {
+      const idx = (startRow + r) * 9 + (startCol + c);
+      if (inputs[idx].value === value && inputs[idx] !== currentInput) {
+        inputs[idx].style.backgroundColor = '#ffe082';
+      }
+    }
+  }
+  }
+  function highlightSimilar(value) {
+    const inputs = document.querySelectorAll('.sudoku-cell input');
+    clearHighlights();
+    if (value === '') return;
+    inputs.forEach(input => {
+      if (input.value === value) {
+        input.style.backgroundColor = '#b3e5fc';
+      }
+    });
+  }
+
+  function clearHighlights() {
+    const inputs = document.querySelectorAll('.sudoku-cell input');
+    inputs.forEach(input => {
+      if (input.disabled) {
+        input.style.backgroundColor = '#f0f0f0';
+      } else {
+        input.style.backgroundColor = '#fff';
+      }
+    });
+  }
+
+  function checkSolution() {
+    const inputs = document.querySelectorAll('.sudoku-cell input');
+    let correct = true;
+    for (let i = 0; i < 81; i++) {
+      const row = Math.floor(i / 9);
+      const col = i % 9;
+      const value = parseInt(inputs[i].value);
+      if (value !== solution[row][col]) {
+        correct = false;
+        inputs[i].style.backgroundColor = '#ffcccc';
+      } else {
+        inputs[i].style.backgroundColor = '#ccffcc';
+      }
+    }
+    alert(correct ? '🎉 Correct solution!' : '❌ Try again!');
+    if (activeValue) highlightSimilar(activeValue);
+    if (correct) {
+      stopTimer();
+      const elapsed = Math.floor((Date.now() - startTime) / 1000);
+      saveBestTime(elapsed);
+    }
+  }
+
+  function startTimer() {
+  clearInterval(timerInterval);
+  startTime = Date.now();
+  timerInterval = setInterval(updateTimer, 1000);
+   localStorage.setItem('sudokuStartTime', startTime);
+  localStorage.setItem('sudokuRunning', 'true');
+}
+
+function stopTimer() {
+  clearInterval(timerInterval);
+  localStorage.setItem('sudokuRunning');
+}
+
+function updateTimer() {
+  const elapsed = Math.floor((Date.now() - startTime) / 1000);
+  const minutes = String(Math.floor(elapsed / 60)).padStart(2, '0');
+  const seconds = String(elapsed % 60).padStart(2, '0');
+  document.getElementById('timer').textContent = `⏱️ Time: ${minutes}:${seconds}`;
+  localStorage.setItem('sudokuElapsedTime', elapsed);
+  localStorage.setItem('sudokuRunning', 'true');
+}
+
+
+function saveBestTime(elapsed) {
+  if (!bestTime || elapsed < bestTime) {
+    bestTime = elapsed;
+    localStorage.setItem('bestTime', elapsed);
+  }
+  displayBestTime();
+}
+
+function displayBestTime() {
+  if (bestTime) {
+    const minutes = String(Math.floor(bestTime / 60)).padStart(2, '0');
+    const seconds = String(bestTime % 60).padStart(2, '0');
+    document.getElementById('bestTime').textContent = `🏆 Best: ${minutes}:${seconds}`;
+  } else {
+    document.getElementById('bestTime').textContent = '🏆 Best: --:--';
+  }
+}
+
+  function resetGame() {
+    renderBoard(puzzle);
+    if (activeValue) highlightSimilar(activeValue);
+    startTimer();
+  }
+
+/* remember time and puzzle on refresh - optional*/
+ window.addEventListener('beforeunload',() =>{
+  if (startTime){
+    const elapsed = Math.floor((Date.now() - startTime)/1000);
+    localStorage.setItem('sudokuElapsedTime', elapsed);
+    localStorage.setItem('sudokuRunning','true');
+  }
+ });
+
+ document.addEventListener('visibiltiychange',() => {
+  if(document.hidden){
+  stopTimer();
+  localStorage.setItem('sudokuRunning','false');
+  } else {
+    resumeTimerIfNeeded();
+  }
+ })
+
+
+ function resumeTimerIfNeeded() {
+  const savedElapsed = parseInt(localStorage.getItem('sudokuElapsedTime')) || 0;
+  startTime = Date.now() - savedElapsed * 1000;
+  startTimer(); // always start the timer when game starts
+  updateTimer(); // immediately show elapsed time
+}
+  displayBestTime();
+</script>
+</body>
+</html>
