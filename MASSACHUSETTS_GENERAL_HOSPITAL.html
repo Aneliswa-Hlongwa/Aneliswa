@@ -1,0 +1,336 @@
+<html>
+
+<head>
+<style type="text/css">
+.inline {
+  background-color: #f7f7f7;
+  border:solid 1px #B0B0B0;
+}
+.error {
+	font-weight: bold;
+	color: #FF0000;
+}
+.warning {
+	font-weight: bold;
+}
+.message {
+	font-style: italic;
+}
+.source, .output, .warning, .error, .message {
+	padding: 0 1em;
+  border:solid 1px #F7F7F7;
+}
+.source {
+  background-color: #f5f5f5;
+}
+.left {
+  text-align: left;
+}
+.right {
+  text-align: right;
+}
+.center {
+  text-align: center;
+}
+.hl.num {
+  color: #AF0F91;
+}
+.hl.str {
+  color: #317ECC;
+}
+.hl.com {
+  color: #AD95AF;
+  font-style: italic;
+}
+.hl.opt {
+  color: #000000;
+}
+.hl.std {
+  color: #585858;
+}
+.hl.kwa {
+  color: #295F94;
+  font-weight: bold;
+}
+.hl.kwb {
+  color: #B05A65;
+}
+.hl.kwc {
+  color: #55aa55;
+}
+.hl.kwd {
+  color: #BC5A65;
+  font-weight: bold;
+}
+</style>
+<title>MASSACHUSETTS GENERAL HOSPITAL ANALYTICS</title>
+</head>
+
+<body>
+<p> This HTML file showcase the visualisations of the analysis for 
+<b>MASSACHUSETTS GENERAL HOSPITAL</b> database.</p>
+
+<h3> <b>Libraries </b> </h3>
+<div class="chunk" id="unnamed-chunk-1"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl kwd">library</span><span class="hl std">(DBI)</span>
+<span class="hl kwd">library</span><span class="hl std">(odbc)</span>
+<span class="hl kwd">library</span><span class="hl std">(ggplot2)</span>
+<span class="hl kwd">library</span><span class="hl std">(scales)</span>
+<span class="hl kwd">library</span><span class="hl std">(tidyr)</span>
+</pre></div>
+</div></div>
+
+<h3><b> Connecting to SQL</b></h3>
+<div class="chunk" id="unnamed-chunk-2"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl std">conn</span><span class="hl kwb">&lt;-</span> <span class="hl kwd">dbConnect</span><span class="hl std">(</span>
+  <span class="hl kwd">odbc</span><span class="hl std">(),</span>
+  <span class="hl kwc">Driver</span> <span class="hl std">=</span> <span class="hl str">&quot;ODBC Driver 17 for SQL Server&quot;</span><span class="hl std">,</span>
+  <span class="hl kwc">Server</span><span class="hl std">=</span><span class="hl str">&quot;ANELISWA\\SQLEXPRESS&quot;</span><span class="hl std">,</span>
+  <span class="hl kwc">Database</span><span class="hl std">=</span> <span class="hl str">&quot;Hospital Database&quot;</span><span class="hl std">,</span>
+  <span class="hl kwc">Trusted_Connection</span> <span class="hl std">=</span><span class="hl str">&quot;Yes&quot;</span>
+<span class="hl std">)</span>
+</pre></div>
+</div></div>
+
+<h4> Total encounters from 2011 to 2022</h4>
+
+
+<div class="chunk" id="unnamed-chunk-3"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl std">encounterdata</span><span class="hl kwb">&lt;-</span> <span class="hl kwd">dbGetQuery</span><span class="hl std">(conn,</span> <span class="hl str">&quot;select YEAR(START) AS YEAR,
+Count(ENCOUNTERCLASS) AS ENCOUNTER_PER_YEAR
+from dbo.encounters
+GROUP BY YEAR(START)
+ORDER BY YEAR(START);&quot;</span><span class="hl std">)</span>
+<span class="hl kwd">head</span><span class="hl std">( encounterdata)</span>
+</pre></div>
+<div class="output"><pre class="knitr r">##   YEAR ENCOUNTER_PER_YEAR
+## 1 2011               1336
+## 2 2012               2105
+## 3 2013               2496
+## 4 2014               3884
+## 5 2015               2468
+## 6 2016               2453
+</pre></div>
+<div class="source"><pre class="knitr r"><span class="hl kwd">ggplot</span><span class="hl std">(encounterdata,</span> <span class="hl kwd">aes</span><span class="hl std">(</span><span class="hl kwc">x</span><span class="hl std">= YEAR,</span> <span class="hl kwc">y</span><span class="hl std">=ENCOUNTER_PER_YEAR))</span> <span class="hl opt">+</span>
+  <span class="hl kwd">geom_line</span><span class="hl std">(</span><span class="hl kwc">color</span><span class="hl std">=</span> <span class="hl str">&quot;limegreen&quot;</span><span class="hl std">,</span> <span class="hl kwc">linewidth</span> <span class="hl std">=</span><span class="hl num">1</span><span class="hl std">)</span><span class="hl opt">+</span>
+  <span class="hl kwd">geom_point</span><span class="hl std">(</span><span class="hl kwc">color</span><span class="hl std">=</span><span class="hl str">&quot;black&quot;</span><span class="hl std">,</span> <span class="hl kwc">size</span> <span class="hl std">=</span><span class="hl num">4</span><span class="hl std">)</span><span class="hl opt">+</span>
+  <span class="hl kwd">scale_x_continuous</span><span class="hl std">(</span><span class="hl kwc">breaks</span> <span class="hl std">=</span> <span class="hl kwd">breaks_width</span><span class="hl std">(</span><span class="hl num">1</span><span class="hl std">))</span><span class="hl opt">+</span>
+  <span class="hl kwd">labs</span><span class="hl std">(</span><span class="hl kwc">title</span> <span class="hl std">=</span> <span class="hl str">&quot;Total encounters in  years&quot;</span><span class="hl std">,</span> <span class="hl kwc">x</span> <span class="hl std">=</span><span class="hl str">&quot;years&quot;</span><span class="hl std">,</span> <span class="hl kwc">y</span><span class="hl std">=</span><span class="hl str">&quot;Encounters&quot;</span><span class="hl std">)</span><span class="hl opt">+</span>
+  <span class="hl kwd">theme_grey</span><span class="hl std">()</span>
+</pre></div>
+</div><div class="rimage default"><img src="figure/unnamed-chunk-3-1.png" alt="plot of chunk unnamed-chunk-3" class="plot" /></div></div>
+
+
+<h4> <u>Percentage of <b> Encounter classes </b> from encounters in a
+year </u></h4>
+<div class="chunk" id="unnamed-chunk-4"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl std">perc_encounter</span><span class="hl kwb">&lt;-</span> <span class="hl kwd">dbGetQuery</span><span class="hl std">(conn,</span> <span class="hl str">&quot;SELECT Year(START) as Year,
+cast(round(sum(case when ENCOUNTERCLASS= 'ambulatory' then 1 else 0 end)* 
+100.0/ count(ENCOUNTERCLASS),2) as float) as Ambulatory,
+cast(round(sum(case when ENCOUNTERCLASS= 'urgentcare' then 1 else 0 end)*
+100.0/ count(ENCOUNTERCLASS),2) as float) as Urgentcare,
+cast(round(sum(case when ENCOUNTERCLASS= 'emergency' then 1 else 0 end)*
+100.0/ count(ENCOUNTERCLASS),2) as float) as Emergency,
+cast(round(sum(case when ENCOUNTERCLASS= 'inpatient' then 1 else 0 end)*
+100.0/ count(ENCOUNTERCLASS),2) as float) as Inpatient ,
+cast(round(sum(case when ENCOUNTERCLASS= 'outpatient' then 1 else 0 end)*
+100.0/ count(ENCOUNTERCLASS),2) as float) as Outpatient,
+cast(round(sum(case when ENCOUNTERCLASS= 'wellness' then 1 else 0 end)*
+100.0/ count(ENCOUNTERCLASS),2) as float) as Wellness
+FROM dbo.encounters
+group by YEAR(START)
+ORDER BY YEAR(START);&quot;</span><span class="hl std">)</span>
+<span class="hl kwd">head</span><span class="hl std">(perc_encounter)</span>
+</pre></div>
+<div class="output"><pre class="knitr r">##   Year Ambulatory Urgentcare Emergency Inpatient Outpatient Wellness
+## 1 2011      49.93       2.25      4.12      6.21      24.48    13.02
+## 2 2012      42.47      14.20      8.69      4.42      21.09     9.12
+## 3 2013      44.35      14.38      9.01      5.37      19.43     7.45
+## 4 2014      60.27       8.42      5.56      3.04      17.84     4.87
+## 5 2015      43.40      15.40      9.24      4.50      20.54     6.93
+## 6 2016      43.82      13.90     10.19      5.06      19.61     7.42
+</pre></div>
+<div class="source"><pre class="knitr r"><span class="hl std">perc_long</span><span class="hl kwb">&lt;-</span><span class="hl kwd">pivot_longer</span><span class="hl std">(perc_encounter,</span> <span class="hl kwc">cols</span> <span class="hl std">=</span> <span class="hl kwd">c</span><span class="hl std">(Ambulatory,Urgentcare,</span>
+                                                 <span class="hl std">Emergency, Inpatient,</span>
+                                                 <span class="hl std">Outpatient,Wellness),</span>
+                        <span class="hl kwc">names_to</span> <span class="hl std">=</span> <span class="hl str">&quot;Encounter_Class&quot;</span><span class="hl std">,</span> <span class="hl kwc">values_to</span> <span class="hl std">=</span> <span class="hl str">&quot;Percentage&quot;</span><span class="hl std">)</span>
+
+<span class="hl kwd">ggplot</span><span class="hl std">(perc_long,</span> <span class="hl kwd">aes</span><span class="hl std">(</span><span class="hl kwc">x</span><span class="hl std">=Year,</span> <span class="hl kwc">y</span><span class="hl std">=Percentage,</span> <span class="hl kwc">fill</span><span class="hl std">=Encounter_Class))</span> <span class="hl opt">+</span>
+  <span class="hl kwd">theme_dark</span><span class="hl std">()</span> <span class="hl opt">+</span>
+  <span class="hl kwd">geom_bar</span><span class="hl std">(</span><span class="hl kwc">stat</span><span class="hl std">=</span><span class="hl str">&quot;identity&quot;</span><span class="hl std">,</span> <span class="hl kwc">position</span> <span class="hl std">=</span> <span class="hl str">&quot;stack&quot;</span><span class="hl std">,</span> <span class="hl kwc">width</span> <span class="hl std">=</span><span class="hl num">0.8</span><span class="hl std">)</span> <span class="hl opt">+</span>
+  <span class="hl kwd">scale_x_continuous</span><span class="hl std">(</span><span class="hl kwc">breaks</span> <span class="hl std">=</span> <span class="hl kwd">breaks_width</span><span class="hl std">(</span><span class="hl num">1</span><span class="hl std">))</span> <span class="hl opt">+</span>
+  <span class="hl kwd">labs</span><span class="hl std">(</span><span class="hl kwc">title</span> <span class="hl std">=</span> <span class="hl str">&quot;Percentage of encounter class in a year&quot;</span><span class="hl std">)</span> <span class="hl opt">+</span>
+  <span class="hl kwd">scale_y_continuous</span><span class="hl std">(</span><span class="hl kwc">labels</span> <span class="hl std">=</span> <span class="hl kwd">percent_format</span><span class="hl std">(</span><span class="hl kwc">scale</span><span class="hl std">=</span><span class="hl num">1</span><span class="hl std">))</span>
+</pre></div>
+</div><div class="rimage default"><img src="figure/unnamed-chunk-4-1.png" alt="plot of chunk unnamed-chunk-4" class="plot" /></div></div>
+
+<h4> Encounters that took more than 24 hours vs encounter that took
+less than 24 hours</h4>
+<div class="chunk" id="unnamed-chunk-5"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl std">time_encounter</span><span class="hl kwb">&lt;-</span> <span class="hl kwd">dbGetQuery</span><span class="hl std">(conn,</span> <span class="hl str">&quot;select 
+cast(round(sum(case when datediff(hour, START,STOP) &gt; 24
+then 1 else 0 end)*100.0 / count(STOP),2) as float) as greater_than_24,
+cast(round(sum(case when datediff(hour, START,STOP) &lt;= 24 
+then 1 else 0 end)*100.0 / count(STOP),2) as float) as less_than_24
+from dbo.encounters;&quot;</span><span class="hl std">)</span>
+
+<span class="hl std">time_encounter</span>
+</pre></div>
+<div class="output"><pre class="knitr r">##   greater_than_24 less_than_24
+## 1            0.25        99.75
+</pre></div>
+</div></div>
+
+<h4> Encounters with zero Payer Covarage</h4>
+<div class="chunk" id="unnamed-chunk-6"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl std">zero_pcov</span><span class="hl kwb">&lt;-</span> <span class="hl kwd">dbGetQuery</span><span class="hl std">(conn,</span>
+<span class="hl str">&quot;select cast(round(sum(case when PAYER_COVERAGE = 0.00 THEN 1 ELSE 0 END)*100.0 
+/ COUNT(*),2) as float) as perc_coverage_is0
+FROM dbo.encounters;&quot;</span><span class="hl std">)</span>
+<span class="hl std">zero_pcov</span>
+</pre></div>
+<div class="output"><pre class="knitr r">##   perc_coverage_is0
+## 1             48.71
+</pre></div>
+</div></div>
+
+
+<h4> Top 10 most perfoemed procedures and their average base cost </h4>
+
+<div class="chunk" id="unnamed-chunk-7"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl std">procedures</span><span class="hl kwb">&lt;-</span> <span class="hl kwd">dbGetQuery</span><span class="hl std">(conn,</span> <span class="hl str">&quot;Select 
+top 10 CAST(DESCRIPTION AS nvarchar) AS PROCEDURES,count(*) as times_perfomed,
+CAST(round(AVG(BASE_COST),2) AS FLOAT) AS AVG_BASE_COST
+from dbo.proceduress
+WHERE CAST(DESCRIPTION AS nvarchar)LIKE '%procedure%'
+group by CAST(DESCRIPTION AS nvarchar)
+ORDER BY count(*) DESC&quot;</span><span class="hl std">)</span>
+<span class="hl std">procedures</span>
+</pre></div>
+<div class="output"><pre class="knitr r">##                        PROCEDURES times_perfomed AVG_BASE_COST
+## 1      Renal dialysis (procedure)           2746       1004.09
+## 2  Cytopathology procedure  prepa            258       2002.04
+## 3          Spirometry (procedure)            209       7792.77
+## 4   Bone density scan (procedure)            198       9602.86
+## 5         Mammography (procedure)            194        116.59
+## 6    Echocardiography (procedure)            179        956.18
+## 7  Teleradiotherapy procedure (pr            170        997.45
+## 8  Hearing examination (procedure            144        431.00
+## 9      Throat culture (procedure)            115       1914.27
+## 10  Plain chest X-ray (procedure)             78       7751.18
+</pre></div>
+</div></div>
+
+<h4> Top 10 most expensive proceduces and the number of times they 
+were performed
+<div class="chunk" id="unnamed-chunk-8"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl std">basecost</span><span class="hl kwb">&lt;-</span> <span class="hl kwd">dbGetQuery</span><span class="hl std">(conn,</span> <span class="hl str">&quot;Select
+top 10 cast(DESCRIPTION as nvarchar) as Procedures,
+cast(round(AVG(BASE_COST),2) as float) AS BASECOST,
+COUNT(*) AS TIMES_PERFOMED
+FROM dbo.proceduress
+where cast(DESCRIPTION as nvarchar) like '%procedure%'
+group by CAST(DESCRIPTION AS nvarchar)
+ORDER BY BASECOST DESC
+&quot;</span><span class="hl std">)</span>
+<span class="hl std">basecost</span>
+</pre></div>
+<div class="output"><pre class="knitr r">##                        Procedures  BASECOST TIMES_PERFOMED
+## 1        Admit to ICU (procedure) 206260.40              5
+## 2        Hemodialysis (procedure)  29299.56             27
+## 3       Thoracentesis (procedure)  19622.00              1
+## 4   Bone density scan (procedure)   9602.86            198
+## 5          Spirometry (procedure)   7792.77            209
+## 6   Plain chest X-ray (procedure)   7751.18             78
+## 7   Sputum microscopy (procedure)   6963.00              1
+## 8  Sputum examination (procedure)   6429.28             71
+## 9    Biopsy of breast (procedure)   3905.71              7
+## 10 Cytopathology procedure  prepa   2002.04            258
+</pre></div>
+</div></div>
+
+<h4> Average claim cost for encounters</h4>
+<div class="chunk" id="unnamed-chunk-9"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl std">Avg_claim</span><span class="hl kwb">&lt;-</span> <span class="hl kwd">dbGetQuery</span><span class="hl std">(conn,</span> <span class="hl str">&quot;SELECT NAME , 
+AVG(TOTAL_CLAIM_COST) AS AVG_CLAIM_COST
+from dbo.encounters  
+join dbo.payers  on dbo.encounters.Id_payers = dbo.payers.Id_payers
+group by NAME;&quot;</span><span class="hl std">)</span>
+<span class="hl std">Avg_claim</span>
+</pre></div>
+<div class="output"><pre class="knitr r">##                      NAME AVG_CLAIM_COST
+## 1                   Aetna       2767.047
+## 2                  Anthem       4236.811
+## 3  Blue Cross Blue Shield       3245.585
+## 4            Cigna Health       2996.950
+## 5           Dual Eligible       1696.191
+## 6                  Humana       3269.300
+## 7                Medicaid       6205.219
+## 8                Medicare       2167.552
+## 9            NO_INSURANCE       5593.197
+## 10       UnitedHealthcare       2848.342
+</pre></div>
+</div></div>
+
+<h4>Number of patients who were admitted per quarter</h4>
+<div class="chunk" id="unnamed-chunk-10"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl std">patient_quarter</span><span class="hl kwb">&lt;-</span> <span class="hl kwd">dbGetQuery</span><span class="hl std">(conn,</span><span class="hl str">&quot;SELECT 
+DATEPART(YEAR,START) AS YEAR,
+DATEPART(QUARTER, START) AS QUARTER,
+Count(distinct Id_patient) as Number_Patients
+FROM dbo.encounters
+group by DATEPART(YEAR,START),DATEPART(QUARTER, START)
+order by YEAR, QUARTER&quot;</span><span class="hl std">)</span>
+<span class="hl kwd">head</span><span class="hl std">(patient_quarter,</span><span class="hl num">5</span><span class="hl std">)</span>
+</pre></div>
+<div class="output"><pre class="knitr r">##   YEAR QUARTER Number_Patients
+## 1 2011       1             156
+## 2 2011       2             162
+## 3 2011       3             155
+## 4 2011       4             168
+## 5 2012       1             249
+</pre></div>
+<div class="source"><pre class="knitr r"><span class="hl kwd">ggplot</span><span class="hl std">(patient_quarter,</span> <span class="hl kwd">aes</span><span class="hl std">(</span><span class="hl kwc">x</span><span class="hl std">=YEAR,</span> <span class="hl kwc">y</span><span class="hl std">=Number_Patients,</span> <span class="hl kwc">fill</span><span class="hl std">=QUARTER))</span><span class="hl opt">+</span>
+  <span class="hl kwd">geom_bar</span><span class="hl std">(</span><span class="hl kwc">stat</span><span class="hl std">=</span><span class="hl str">&quot;identity&quot;</span><span class="hl std">,</span> <span class="hl kwc">position</span> <span class="hl std">=</span> <span class="hl str">&quot;stack&quot;</span><span class="hl std">)</span><span class="hl opt">+</span>
+  <span class="hl kwd">theme_grey</span><span class="hl std">()</span> <span class="hl opt">+</span>
+  <span class="hl kwd">scale_x_continuous</span><span class="hl std">(</span><span class="hl kwc">breaks</span> <span class="hl std">=</span> <span class="hl kwd">breaks_width</span><span class="hl std">(</span><span class="hl num">1</span><span class="hl std">))</span><span class="hl opt">+</span>
+  <span class="hl kwd">labs</span><span class="hl std">(</span><span class="hl kwc">title</span> <span class="hl std">=</span> <span class="hl str">&quot;Number of patients in a quarter&quot;</span><span class="hl std">)</span>
+</pre></div>
+</div><div class="rimage default"><img src="figure/unnamed-chunk-10-1.png" alt="plot of chunk unnamed-chunk-10" class="plot" /></div></div>
+
+<h4>Number of patients who were readmitted in a 30 day period</h4>
+
+<div class="chunk" id="unnamed-chunk-11"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl std">read_30d</span><span class="hl kwb">&lt;-</span> <span class="hl kwd">dbGetQuery</span><span class="hl std">(conn,</span><span class="hl str">&quot;with encounter as (
+SELECT
+Id_patient,
+Id_encounter,
+STOP,
+LAG(STOP) OVER (PARTITION BY Id_patient ORDER BY STOP) AS prev_encounter_date
+from dbo.encounters
+),
+ ReadmmittedPatients AS ( 
+ Select  distinct Id_patient
+ from encounter
+ where DATEDIFF(DAY, prev_encounter_date, STOP) between 1 and 30
+
+ )
+ Select Count(*) As total_patients_readmitted_30d
+ from ReadmmittedPatients&quot;</span><span class="hl std">)</span>
+<span class="hl std">read_30d</span>
+</pre></div>
+<div class="output"><pre class="knitr r">##   total_patients_readmitted_30d
+## 1                           772
+</pre></div>
+</div></div>
+
+<h4>15 Patients who had most readmissions</h4>
+<div class="chunk" id="unnamed-chunk-12"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl std">most_readm</span><span class="hl kwb">&lt;-</span> <span class="hl kwd">dbGetQuery</span><span class="hl std">(conn,</span><span class="hl str">&quot;select top 15 FIRST, LAST, count(*) as 
+number_readmitted
+FROM dbo.encounters e join dbo.patients p on e.Id_patient=p.Id_patient
+group by FIRST, LAST
+order by number_readmitted desc&quot;</span><span class="hl std">)</span>
+<span class="hl kwd">head</span><span class="hl std">(most_readm)</span>
+</pre></div>
+<div class="output"><pre class="knitr r">##         FIRST       LAST number_readmitted
+## 1 Kimberly    Collier                 1381
+## 2    Shani    Parisian                 887
+## 3  Mariano      O'Kon                  877
+## 4     Gail     Glover                  447
+## 5     Ward    Nicolas                  441
+## 6   Marcos     Parker                  392
+</pre></div>
+</div></div>
+
+
+</body>
+</html>
